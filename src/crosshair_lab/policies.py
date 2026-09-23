@@ -51,7 +51,7 @@ def calculate_scale(
     Raises
     ------
     ValueError
-        If the custom policy lacks a positive factor.
+        If the custom policy lacks a positive finite factor.
     """
     horizontal = source.horizontal_scale_to(target)
     vertical = source.vertical_scale_to(target)
@@ -63,8 +63,12 @@ def calculate_scale(
         return min(horizontal, vertical)
     if policy is ScalePolicy.FILL:
         return max(horizontal, vertical)
-    if custom_scale is None or custom_scale <= 0:
-        raise ValueError("custom scale must be a positive decimal")
+    if (
+        custom_scale is None
+        or not custom_scale.is_finite()
+        or custom_scale <= 0
+    ):
+        raise ValueError("custom scale must be a positive finite decimal")
     return custom_scale
 
 
@@ -86,10 +90,10 @@ def round_dimension(value: Decimal, policy: RoundingPolicy) -> Decimal:
     Raises
     ------
     ValueError
-        If the dimension is negative.
+        If the dimension is negative or non-finite.
     """
-    if value < 0:
-        raise ValueError("dimension must be non-negative")
+    if not value.is_finite() or value < 0:
+        raise ValueError("dimension must be finite and non-negative")
     if policy is RoundingPolicy.NEAREST:
         return value.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
     if policy is RoundingPolicy.FLOOR:

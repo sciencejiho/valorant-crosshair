@@ -64,3 +64,15 @@ def test_nearest_rounds_half_up_instead_of_to_even() -> None:
 def test_rounding_rejects_negative_dimensions() -> None:
     with pytest.raises(ValueError):
         round_dimension(Decimal("-0.1"), RoundingPolicy.NEAREST)
+
+
+@pytest.mark.parametrize("value", [Decimal("NaN"), Decimal("Infinity")])
+def test_custom_scale_rejects_non_finite_values(value: Decimal) -> None:
+    with pytest.raises(ValueError):
+        calculate_scale(SOURCE, TARGET, ScalePolicy.CUSTOM, value)
+
+
+@pytest.mark.parametrize("value", [Decimal("NaN"), Decimal("Infinity")])
+def test_rounding_rejects_non_finite_dimensions(value: Decimal) -> None:
+    with pytest.raises(ValueError):
+        round_dimension(value, RoundingPolicy.NEAREST)

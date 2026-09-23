@@ -57,3 +57,24 @@ def test_malformed_crosshair_reports_parser_diagnostic(capsys) -> None:
 
     assert exit_code == 2
     assert "no following value" in captured.err
+
+
+def test_non_finite_custom_scale_reports_user_error(capsys) -> None:
+    exit_code = main(
+        [
+            "convert",
+            "--from",
+            "1920x1080",
+            "--to",
+            "3840x2160",
+            "--policy",
+            "custom",
+            "--scale",
+            "NaN",
+            CODE,
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert "positive finite" in captured.err
