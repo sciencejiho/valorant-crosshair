@@ -10,6 +10,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.scripts]
+crosshair-lab = "crosshair_lab.cli:main"
+
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<9"]
 
