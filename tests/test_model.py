@@ -1,3 +1,5 @@
+"""Tests for immutable crosshair domain models."""
+
 from crosshair_lab.diagnostics import Diagnostic, ParseResult, Severity
 from crosshair_lab.model import CrosshairCode, CrosshairToken, SectionMarker
 

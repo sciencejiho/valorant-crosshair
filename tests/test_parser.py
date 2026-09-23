@@ -1,3 +1,5 @@
+"""Tests for valid and malformed crosshair parsing."""
+
 import pytest
 
 from crosshair_lab.model import CrosshairToken, SectionMarker
@@ -91,3 +93,17 @@ def test_same_key_in_different_sections_does_not_warn() -> None:
 
     assert result.ok
     assert result.warnings == ()
+
+
+def test_parse_rejects_code_longer_than_input_limit() -> None:
+    result = parse_crosshair("0;" + ("a" * 8192))
+
+    assert result.code is None
+    assert [item.code for item in result.errors] == ["code_too_long"]
+
+
+def test_parse_rejects_more_than_512_delimited_atoms() -> None:
+    result = parse_crosshair("0;" + ";".join(["x;1"] * 256))
+
+    assert result.code is None
+    assert [item.code for item in result.errors] == ["too_many_tokens"]

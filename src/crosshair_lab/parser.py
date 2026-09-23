@@ -1,6 +1,7 @@
 """Lossless parser for semicolon-delimited VALORANT crosshair codes."""
 
 from crosshair_lab.diagnostics import Diagnostic, ParseResult, Severity
+from crosshair_lab.limits import MAX_ATOMS, MAX_CODE_LENGTH
 from crosshair_lab.model import CrosshairCode, CrosshairElement, CrosshairToken
 from crosshair_lab.model import SectionMarker
 
@@ -45,7 +46,9 @@ def _parse_elements(
     section: str | None = None
     index = 1
 
-    while index < len(atoms):
+    for _ in range(MAX_ATOMS):
+        if index >= len(atoms):
+            return elements
         key = atoms[index]
         if key in SECTION_MARKERS:
             section = key
@@ -67,7 +70,7 @@ def _parse_elements(
                     index,
                 )
             )
-            break
+            return elements
         if atoms[index + 1] in SECTION_MARKERS:
             diagnostics.append(
                 _diagnostic(
@@ -80,30 +83,45 @@ def _parse_elements(
             index += 1
             continue
 
-        value = atoms[index + 1]
-        if not value:
-            diagnostics.append(
-                _diagnostic(
-                    Severity.ERROR,
-                    "empty_value",
-                    f"Parameter '{key}' has an empty value.",
-                    index + 1,
-                )
-            )
-        identity = (section, key)
-        if identity in seen:
-            diagnostics.append(
-                _diagnostic(
-                    Severity.WARNING,
-                    "duplicate_parameter",
-                    f"Parameter '{key}' is duplicated in section {section!r}.",
-                    index,
-                )
-            )
-        seen.add(identity)
-        elements.append(CrosshairToken(key, value, section))
+        _append_parameter(
+            elements,
+            seen,
+            diagnostics,
+            CrosshairToken(key, atoms[index + 1], section),
+            index,
+        )
         index += 2
-    return elements
+    raise RuntimeError("parser exhausted its bounded token budget")
+
+
+def _append_parameter(
+    elements: list[CrosshairElement],
+    seen: set[tuple[str | None, str]],
+    diagnostics: list[Diagnostic],
+    token: CrosshairToken,
+    index: int,
+) -> None:
+    if not token.value:
+        diagnostics.append(
+            _diagnostic(
+                Severity.ERROR,
+                "empty_value",
+                f"Parameter '{token.key}' has an empty value.",
+                index + 1,
+            )
+        )
+    identity = (token.section, token.key)
+    if identity in seen:
+        diagnostics.append(
+            _diagnostic(
+                Severity.WARNING,
+                "duplicate_parameter",
+                f"Parameter '{token.key}' is duplicated in section {token.section!r}.",
+                index,
+            )
+        )
+    seen.add(identity)
+    elements.append(token)
 
 
 def parse_crosshair(text: str) -> ParseResult:
@@ -119,6 +137,14 @@ def parse_crosshair(text: str) -> ParseResult:
     ParseResult
         Parsed code and any diagnostics. Invalid input produces no code.
     """
+    if len(text) > MAX_CODE_LENGTH:
+        diagnostic = _diagnostic(
+            Severity.ERROR,
+            "code_too_long",
+            f"Crosshair code exceeds {MAX_CODE_LENGTH} characters.",
+            None,
+        )
+        return ParseResult(None, (diagnostic,))
     if not text.strip():
         diagnostic = _diagnostic(
             Severity.ERROR, "empty_code", "Crosshair code is empty.", None
@@ -126,6 +152,14 @@ def parse_crosshair(text: str) -> ParseResult:
         return ParseResult(None, (diagnostic,))
 
     atoms, trailing_separator, diagnostics = _split_atoms(text)
+    if len(atoms) > MAX_ATOMS:
+        diagnostic = _diagnostic(
+            Severity.ERROR,
+            "too_many_tokens",
+            f"Crosshair code exceeds {MAX_ATOMS} delimited atoms.",
+            None,
+        )
+        return ParseResult(None, (diagnostic,))
     prefix = atoms[0]
     if not prefix:
         diagnostics.append(

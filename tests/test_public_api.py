@@ -1,3 +1,5 @@
+"""Tests for the package-level foundation API."""
+
 import crosshair_lab
 
 

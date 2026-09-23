@@ -2,6 +2,7 @@
 
 from dataclasses import replace
 
+from crosshair_lab.limits import MAX_ELEMENTS
 from crosshair_lab.model import CrosshairCode, CrosshairToken, SectionMarker
 
 
@@ -17,9 +18,19 @@ def serialize_crosshair(code: CrosshairCode) -> str:
     -------
     str
         Semicolon-delimited code preserving the modeled stream.
+
+    Raises
+    ------
+    ValueError
+        If a programmatically constructed model exceeds the resource limit.
     """
+    if len(code.elements) > MAX_ELEMENTS:
+        raise ValueError(f"crosshair has too many elements; maximum is {MAX_ELEMENTS}")
     atoms = [code.prefix]
-    for element in code.elements:
+    for index in range(MAX_ELEMENTS):
+        if index >= len(code.elements):
+            break
+        element = code.elements[index]
         if isinstance(element, SectionMarker):
             atoms.append(element.name)
         else:
@@ -72,7 +83,10 @@ def replace_parameter(
 
     elements = list(code.elements)
     match_index = 0
-    for index, element in enumerate(elements):
+    for index in range(MAX_ELEMENTS):
+        if index >= len(elements):
+            break
+        element = elements[index]
         if not isinstance(element, CrosshairToken):
             continue
         if element.key != key or element.section != section:
