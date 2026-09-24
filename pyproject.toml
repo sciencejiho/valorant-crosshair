@@ -36,7 +36,7 @@ Issues = "https://github.com/sciencejiho/valorant-crosshair/issues"
 Changelog = "https://github.com/sciencejiho/valorant-crosshair/releases"
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3,<9"]
+dev = ["pytest>=8.3,<10"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
