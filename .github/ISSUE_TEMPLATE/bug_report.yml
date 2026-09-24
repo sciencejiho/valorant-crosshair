@@ -1,0 +1,32 @@
+name: Bug report
+description: Report incorrect parsing, conversion, or CLI behavior.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include the crosshair code only if it contains no sensitive data.
+    validations:
+      required: true
+  - type: input
+    id: resolutions
+    attributes:
+      label: Source and target resolutions
+      placeholder: 1920x1080 → 3840x2160
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and output
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Python and Crosshair Lab versions
+    validations:
+      required: true

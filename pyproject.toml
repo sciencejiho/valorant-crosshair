@@ -8,10 +8,32 @@ version = "0.1.0"
 description = "Parse, inspect, and convert VALORANT crosshair codes."
 readme = "README.md"
 requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Jiho Han", email = "sciencejiho@gmail.com" },
+]
+keywords = ["valorant", "crosshair", "resolution", "gaming", "cli"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Games/Entertainment",
+]
 dependencies = []
 
 [project.scripts]
 crosshair-lab = "crosshair_lab.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/sciencejiho/valorant-crosshair"
+Repository = "https://github.com/sciencejiho/valorant-crosshair.git"
+Issues = "https://github.com/sciencejiho/valorant-crosshair/issues"
+Changelog = "https://github.com/sciencejiho/valorant-crosshair/releases"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<9"]
